@@ -1,122 +1,180 @@
 import math
 
-# ---------------------- Helper Functions ---------------------- #
+# ---------------------- Utility Functions ---------------------- #
 def get_positive_float(prompt):
     while True:
         try:
             value = float(input(prompt))
             if value <= 0:
-                print("Value must be greater than zero. Try again.")
+                print(" Value must be greater than zero. Try again.")
             else:
                 return value
         except ValueError:
-            print("Invalid input! Please enter a valid number.")
+            print(" Invalid input! Please enter a valid number.")
+
+def get_choice(prompt, valid_choices):
+    while True:
+        choice = input(prompt).strip()
+        if choice in valid_choices:
+            return choice
+        print(" Invalid choice! Try again.")
 
 def display(value):
     return round(value, 2)
 
-# ---------------------- 2D Shapes ---------------------- #
+def pause():
+    input("\n Press Enter to continue...")
+
+# ---------------------- Calculation Logic ---------------------- #
+# 2D Shapes
+def calc_circle(r):
+    return {
+        "Area": math.pi * r**2,
+        "Circumference": 2 * math.pi * r
+    }
+
+def calc_square(s):
+    return {
+        "Area": s**2,
+        "Perimeter": 4 * s
+    }
+
+def calc_rectangle(l, b):
+    return {
+        "Area": l * b,
+        "Perimeter": 2 * (l + b)
+    }
+
+def calc_triangle_base_height(base, height):
+    return {
+        "Area": 0.5 * base * height
+    }
+
+def calc_triangle_heron(a, b, c):
+    if not (a + b > c and a + c > b and b + c > a):
+        return None
+    s = (a + b + c) / 2
+    area = math.sqrt(s*(s-a)*(s-b)*(s-c))
+    return {
+        "Area": area,
+        "Perimeter": a + b + c
+    }
+
+# 3D Shapes
+def calc_cylinder(r, h):
+    return {
+        "Curved Surface Area": 2 * math.pi * r * h,
+        "Total Surface Area": 2 * math.pi * r * (h + r),
+        "Volume": math.pi * r**2 * h
+    }
+
+def calc_sphere(r):
+    return {
+        "Surface Area": 4 * math.pi * r**2,
+        "Volume": (4/3) * math.pi * r**3
+    }
+
+def calc_hemisphere(r):
+    return {
+        "Curved Surface Area": 2 * math.pi * r**2,
+        "Total Surface Area": 3 * math.pi * r**2,
+        "Volume": (2/3) * math.pi * r**3
+    }
+
+def calc_cone(r, h):
+    l = math.sqrt(r**2 + h**2)
+    return {
+        "Curved Surface Area": math.pi * r * l,
+        "Total Surface Area": math.pi * r * (l + r),
+        "Volume": (1/3) * math.pi * r**2 * h
+    }
+
+# ---------------------- Display Function ---------------------- #
+def print_results(results):
+    for key, value in results.items():
+        if "Area" in key:
+            unit = "units²"
+        elif "Volume" in key:
+            unit = "units³"
+        else:
+            unit = "units"
+        print(f"{key} = {display(value)} {unit}")
+
+# ---------------------- Shape Handlers ---------------------- #
 def circle():
     print("\n--- Circle ---")
     r = get_positive_float("Enter radius: ")
-    area = math.pi * r**2
-    circumference = 2 * math.pi * r
-
-    print("Area =", display(area), "units²")
-    print("Circumference =", display(circumference), "units")
+    print_results(calc_circle(r))
+    pause()
 
 def square():
     print("\n--- Square ---")
     s = get_positive_float("Enter side: ")
-    print("Area =", display(s**2), "units²")
-    print("Perimeter =", display(4*s), "units")
+    print_results(calc_square(s))
+    pause()
 
 def rectangle():
     print("\n--- Rectangle ---")
     l = get_positive_float("Enter length: ")
     b = get_positive_float("Enter breadth: ")
-    print("Area =", display(l*b), "units²")
-    print("Perimeter =", display(2*(l+b)), "units")
+    print_results(calc_rectangle(l, b))
+    pause()
 
 def triangle():
-    print("\n--- Triangle ---")
-    print("1. Base & Height")
-    print("2. Heron's Formula (3 sides)")
+    while True:
+        print("\n--- Triangle ---")
+        print("1. Base & Height")
+        print("2. Heron's Formula")
+        print("0. Back")
 
-    choice = input("Choose method: ")
+        choice = get_choice("Choose method: ", {"1", "2", "0"})
 
-    if choice == "1":
-        base = get_positive_float("Enter base: ")
-        height = get_positive_float("Enter height: ")
-        area = 0.5 * base * height
-        print("Area =", display(area), "units²")
+        if choice == "1":
+            base = get_positive_float("Enter base: ")
+            height = get_positive_float("Enter height: ")
+            print_results(calc_triangle_base_height(base, height))
+            pause()
 
-    elif choice == "2":
-        a = get_positive_float("Side 1: ")
-        b = get_positive_float("Side 2: ")
-        c = get_positive_float("Side 3: ")
+        elif choice == "2":
+            a = get_positive_float("Side 1: ")
+            b = get_positive_float("Side 2: ")
+            c = get_positive_float("Side 3: ")
 
-        if a + b > c and a + c > b and b + c > a:
-            s = (a + b + c) / 2
-            area = math.sqrt(s*(s-a)*(s-b)*(s-c))
-            print("Area =", display(area), "units²")
-            print("Perimeter =", display(a+b+c), "units")
-        else:
-            print("Invalid triangle sides!")
+            result = calc_triangle_heron(a, b, c)
+            if result:
+                print_results(result)
+            else:
+                print(" Invalid triangle sides!")
+            pause()
 
-    else:
-        print("Invalid choice!")
+        elif choice == "0":
+            break
 
-# ---------------------- 3D Shapes ---------------------- #
 def cylinder():
     print("\n--- Cylinder ---")
     r = get_positive_float("Enter radius: ")
     h = get_positive_float("Enter height: ")
-
-    csa = 2 * math.pi * r * h
-    tsa = 2 * math.pi * r * (h + r)
-    volume = math.pi * r**2 * h
-
-    print("Curved Surface Area =", display(csa))
-    print("Total Surface Area =", display(tsa))
-    print("Volume =", display(volume))
+    print_results(calc_cylinder(r, h))
+    pause()
 
 def sphere():
     print("\n--- Sphere ---")
     r = get_positive_float("Enter radius: ")
-
-    tsa = 4 * math.pi * r**2
-    volume = (4/3) * math.pi * r**3
-
-    print("Surface Area =", display(tsa))
-    print("Volume =", display(volume))
+    print_results(calc_sphere(r))
+    pause()
 
 def hemisphere():
     print("\n--- Hemisphere ---")
     r = get_positive_float("Enter radius: ")
-
-    csa = 2 * math.pi * r**2
-    tsa = 3 * math.pi * r**2
-    volume = (2/3) * math.pi * r**3
-
-    print("Curved Surface Area =", display(csa))
-    print("Total Surface Area =", display(tsa))
-    print("Volume =", display(volume))
+    print_results(calc_hemisphere(r))
+    pause()
 
 def cone():
     print("\n--- Cone ---")
     r = get_positive_float("Enter radius: ")
     h = get_positive_float("Enter height: ")
-
-    l = math.sqrt(r**2 + h**2)  # slant height
-
-    csa = math.pi * r * l
-    tsa = math.pi * r * (l + r)
-    volume = (1/3) * math.pi * r**2 * h
-
-    print("Curved Surface Area =", display(csa))
-    print("Total Surface Area =", display(tsa))
-    print("Volume =", display(volume))
+    print_results(calc_cone(r, h))
+    pause()
 
 # ---------------------- Menu ---------------------- #
 menu = {
@@ -132,17 +190,20 @@ menu = {
 }
 
 # ---------------------- Main Loop ---------------------- #
-while True:
-    print("\n====== GEOMETRY CALCULATOR ======")
-    for key, (name, _) in menu.items():
-        print(f"{key}. {name}")
+def main():
+    while True:
+        print("\n====== GEOMETRY CALCULATOR ======")
+        for key, (name, _) in menu.items():
+            print(f"{key}. {name}")
 
-    choice = input("Enter your choice: ").strip()
+        choice = get_choice("Enter your choice: ", menu.keys())
 
-    if choice == "0":
-        print("Goodbye!")
-        break
-    elif choice in menu:
+        if choice == "0":
+            print(" Goodbye!")
+            break
+
         menu[choice][1]()
-    else:
-        print("Invalid choice! Try again.")
+
+# ---------------------- Entry Point ---------------------- #
+if __name__ == "__main__":
+    main()
